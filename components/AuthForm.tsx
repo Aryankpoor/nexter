@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,29 +15,35 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-
-const formSchema = z.object({
-  username: z.string().min(2).max(50),
-})
+import Link from "next/link";
 
 type FormType = "sign-in" | "sign-up";
+
+const authFormSchema = (formType: FormType) => {
+  return z.object({
+    email: z.string().email(),
+    fullName: formType === "sign-up" ? z.string().min(2).max(50) : z.string().optional(),
+  });
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AuthForm = ({ type }: { type: FormType}) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const formSchema = authFormSchema(type);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      fullName: "", email: ""
     },
   })
  
   
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values)
-  }
+  };
 
 
   return <>
@@ -89,6 +94,7 @@ const AuthForm = ({ type }: { type: FormType}) => {
         {errorMessage && (<p className="error-message">*{errorMessage}</p>)}
         <div className="body-2 flex justify-center">
           <p className="text-light-100">{type === "sign-in" ? "Don't have an account?" : "Already have an account?"}</p>
+          <Link href={type === "sign-in" ? "/sign-up" : "/sign-in"} className="ml-1 font-medium text-brand">{" "}{type === "sign-in" ? "Sign Up" : "Sign In"}</Link>
         </div>
       </form>
     </Form>
